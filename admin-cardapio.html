@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LABRIOLAG — Painel do Comerciante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --bg:      #0a0a0c;
+  --panel:   #111115;
+  --card:    #18181e;
+  --border:  #252530;
+  --accent:  #ff3c3c;
+  --gold:    #f0b429;
+  --green:   #00e096;
+  --blue:    #3b82f6;
+  --text:    #ececf4;
+  --muted:   #5c5c72;
+  --muted2:  #8888a0;
+  --font:    'DM Sans', sans-serif;
+  --mono:    'DM Mono', monospace;
+  --display: 'Bebas Neue', sans-serif;
+  --r:       10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text)}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ══════════════ LOGIN SCREEN ══════════════ */
+#login-screen {
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%,rgba(255,60,60,.12),transparent),
+    var(--bg);
+}
+.login-box {
+  width:100%;max-width:420px;padding:0 20px;
+}
+.login-logo {
+  font-family:var(--display);
+  font-size:2.8rem;letter-spacing:6px;
+  color:var(--accent);text-align:center;margin-bottom:4px;
+}
+.login-sub {
+  text-align:center;font-size:.78rem;color:var(--muted2);
+  letter-spacing:2px;margin-bottom:40px;
+}
+.login-card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:16px;padding:32px;
+}
+.lc-title {
+  font-size:1.1rem;font-weight:700;margin-bottom:6px;
+}
+.lc-sub {font-size:.82rem;color:var(--muted2);margin-bottom:24px;}
+.field-label {
+  display:block;font-size:.66rem;font-weight:700;
+  letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;
+}
+.field-input {
+  width:100%;padding:12px 14px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--r);
+  color:var(--text);font-family:var(--mono);font-size:.88rem;
+  outline:none;transition:border-color .15s;margin-bottom:16px;
+}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--muted);}
+.btn-primary {
+  width:100%;padding:14px;background:var(--accent);
+  border:none;border-radius:var(--r);color:#fff;
+  font-family:var(--font);font-size:.88rem;font-weight:800;
+  letter-spacing:.6px;cursor:pointer;transition:all .14s;
+}
+.btn-primary:hover{background:#ff5252;}
+.btn-primary:active{transform:scale(.98);}
+.login-err {
+  display:none;margin-top:14px;padding:10px 14px;
+  background:rgba(255,60,60,.1);border:1px solid rgba(255,60,60,.25);
+  border-radius:8px;font-size:.8rem;color:var(--accent);
+}
+
+/* ══════════════ MAIN APP ══════════════ */
+#app{display:none;height:100vh;flex-direction:column;}
+
+/* ── TOPBAR ── */
+.topbar {
+  height:56px;min-height:56px;
+  background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100;
+}
+.topbar-logo {
+  font-family:var(--display);font-size:1.6rem;
+  letter-spacing:4px;color:var(--accent);flex-shrink:0;
+}
+.topbar-logo span{font-family:var(--font);font-size:.7rem;font-weight:400;color:var(--muted2);letter-spacing:1px;margin-left:8px;}
+.topbar-sep{flex:1;}
+.user-badge {
+  display:flex;align-items:center;gap:10px;
+  padding:6px 14px;background:var(--card);
+  border:1px solid var(--border);border-radius:8px;
+}
+.ub-owner{font-size:.78rem;font-weight:700;color:var(--text);}
+.ub-tier {
+  font-size:.64rem;font-weight:700;letter-spacing:.8px;
+  padding:2px 8px;border-radius:5px;text-transform:uppercase;
+}
+.tier-starter{background:rgba(107,107,122,.15);color:var(--muted2);}
+.tier-basic  {background:rgba(59,130,246,.15);color:var(--blue);}
+.tier-pro    {background:rgba(240,180,41,.15);color:var(--gold);}
+.tier-enterprise{background:rgba(0,224,150,.15);color:var(--green);}
+.credits-badge {
+  font-size:.72rem;font-family:var(--mono);
+  color:var(--gold);display:flex;align-items:center;gap:4px;
+}
+.btn-logout {
+  padding:6px 12px;background:none;border:1px solid var(--border);
+  border-radius:8px;color:var(--muted2);font-family:var(--font);
+  font-size:.72rem;cursor:pointer;transition:all .14s;
+}
+.btn-logout:hover{color:var(--accent);border-color:rgba(255,60,60,.4);}
+
+/* ── WORKSPACE ── */
+.workspace{flex:1;display:flex;overflow:hidden;}
+
+/* ── SIDEBAR NAV ── */
+.sidebar {
+  width:210px;min-width:210px;background:var(--panel);
+  border-right:1px solid var(--border);
+  padding:16px 12px;display:flex;flex-direction:column;gap:4px;
+}
+.nav-section{font-size:.6rem;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;padding:12px 8px 6px;}
+.nav-btn {
+  width:100%;padding:10px 12px;border-radius:8px;border:none;background:none;
+  color:var(--muted2);font-family:var(--font);font-size:.82rem;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:10px;transition:all .14s;text-align:left;
+}
+.nav-btn:hover{background:var(--card);color:var(--text);}
+.nav-btn.active{background:rgba(255,60,60,.12);color:var(--accent);}
+.nav-btn .ni{width:16px;text-align:center;flex-shrink:0;font-size:.9rem;}
+.sidebar-spacer{flex:1;}
+.save-all-btn {
+  width:100%;padding:11px;background:var(--accent);
+  border:none;border-radius:var(--r);color:#fff;
+  font-family:var(--font);font-size:.8rem;font-weight:800;
+  cursor:pointer;letter-spacing:.5px;transition:all .14s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.save-all-btn:hover{background:#ff5252;}
+.save-all-btn:active{transform:scale(.97);}
+.save-status{text-align:center;font-size:.7rem;color:var(--muted);margin-top:8px;min-height:16px;}
+
+/* ── MAIN CONTENT ── */
+.main-content{flex:1;overflow-y:auto;padding:28px;}
+
+/* ── SECTIONS ── */
+.section{display:none;}
+.section.active{display:block;}
+.section-title {
+  font-family:var(--display);font-size:1.8rem;letter-spacing:3px;
+  color:var(--text);margin-bottom:4px;
+}
+.section-sub{font-size:.82rem;color:var(--muted2);margin-bottom:28px;}
+
+/* ── FORM CARD ── */
+.form-card {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:14px;padding:24px;margin-bottom:20px;
+}
+.fc-title {
+  font-size:.7rem;font-weight:700;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:18px;
+  display:flex;align-items:center;gap:10px;
+}
+.fc-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.field-group{margin-bottom:0;}
+.field-group .field-label{margin-bottom:6px;}
+.color-row{display:flex;gap:10px;align-items:flex-end;}
+.color-input{
+  width:52px;height:42px;padding:4px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;cursor:pointer;
+}
+.color-hex{flex:1;}
+
+/* ── HORÁRIOS ── */
+.dias-grid{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.dia-chip {
+  padding:6px 12px;border-radius:8px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--muted2);font-size:.75rem;font-weight:700;
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.dia-chip.on{background:rgba(0,224,150,.12);border-color:rgba(0,224,150,.35);color:var(--green);}
+.horario-row{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+.time-inp{width:110px;text-align:center;}
+
+/* ── ENTREGA / BAIRROS ── */
+.bairro-row{display:grid;grid-template-columns:1fr 100px 36px;gap:8px;margin-bottom:8px;align-items:center;}
+.add-row {
+  width:100%;padding:10px;border-radius:8px;border:1px dashed var(--border);
+  background:none;color:var(--muted);cursor:pointer;font-family:var(--font);
+  font-size:.8rem;font-weight:600;transition:all .14s;margin-top:4px;
+}
+.add-row:hover{border-color:var(--accent);color:var(--accent);background:rgba(255,60,60,.05);}
+.del-btn {
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--muted);cursor:pointer;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;transition:all .14s;
+}
+.del-btn:hover{background:rgba(255,60,60,.12);color:var(--accent);border-color:rgba(255,60,60,.3);}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.toggle-label{font-size:.85rem;font-weight:600;}
+.toggle {
+  position:relative;width:44px;height:24px;cursor:pointer;
+}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-track {
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:var(--border);border-radius:12px;transition:all .2s;
+}
+.toggle input:checked + .toggle-track{background:var(--green);}
+.toggle-thumb {
+  position:absolute;top:3px;left:3px;
+  width:18px;height:18px;background:#fff;
+  border-radius:50%;transition:all .2s;
+}
+.toggle input:checked ~ .toggle-thumb{transform:translateX(20px);}
+
+/* ── CATEGORIAS ── */
+.categoria-card {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:14px;overflow:hidden;
+}
+.categoria-head {
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  border-bottom:1px solid var(--border);cursor:pointer;
+}
+.cat-drag{color:var(--muted);font-size:1rem;cursor:grab;}
+.cat-name-inp{flex:1;font-weight:700;font-size:.92rem;}
+.cat-count{font-size:.72rem;color:var(--muted2);font-family:var(--mono);}
+.cat-toggle-btn {
+  padding:4px 10px;border-radius:6px;border:1px solid var(--border);
+  background:none;color:var(--muted2);font-size:.68rem;font-weight:700;
+  cursor:pointer;font-family:var(--font);letter-spacing:.5px;transition:all .14s;
+}
+.cat-toggle-btn.open{background:rgba(255,60,60,.1);border-color:rgba(255,60,60,.3);color:var(--accent);}
+.categoria-body{display:none;padding:14px 16px;}
+.categoria-body.open{display:block;}
+
+/* ── ITENS ── */
+.item-card {
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;padding:14px;margin-bottom:10px;position:relative;
+}
+.item-row{display:grid;grid-template-columns:1fr 100px 80px;gap:10px;align-items:start;}
+.item-desc-inp{font-size:.82rem;resize:none;height:44px;margin-top:8px;}
+.item-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.badge-btn {
+  padding:3px 10px;border-radius:6px;border:1px solid var(--border);
+  background:none;color:var(--muted);font-size:.65rem;font-weight:700;
+  cursor:pointer;font-family:var(--font);letter-spacing:.5px;transition:all .14s;
+}
+.badge-btn.on-novo{background:rgba(240,180,41,.12);border-color:rgba(240,180,41,.35);color:var(--gold);}
+.badge-btn.on-inativo{background:rgba(107,107,122,.12);border-color:rgba(107,107,122,.3);color:var(--muted2);}
+.badge-btn.on-destaque{background:rgba(255,60,60,.1);border-color:rgba(255,60,60,.25);color:var(--accent);}
+.item-img-inp{font-size:.8rem;}
+.item-del{
+  position:absolute;top:10px;right:10px;
+  width:26px;height:26px;border-radius:6px;
+  border:1px solid var(--border);background:none;color:var(--muted);
+  cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;
+  transition:all .14s;
+}
+.item-del:hover{background:rgba(255,60,60,.12);color:var(--accent);border-color:rgba(255,60,60,.3);}
+.add-item-btn {
+  width:100%;padding:9px;border-radius:8px;border:1px dashed var(--border);
+  background:none;color:var(--muted);cursor:pointer;font-family:var(--font);
+  font-size:.78rem;font-weight:600;transition:all .14s;
+}
+.add-item-btn:hover{border-color:var(--green);color:var(--green);background:rgba(0,224,150,.05);}
+.add-cat-btn {
+  width:100%;padding:12px;border-radius:10px;border:1px dashed var(--border);
+  background:none;color:var(--muted);cursor:pointer;font-family:var(--font);
+  font-size:.84rem;font-weight:700;transition:all .14s;
+}
+.add-cat-btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.05);}
+
+/* ── QR CODE SECTION ── */
+.qr-box {
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:14px;padding:32px;
+}
+.qr-frame {
+  width:220px;height:220px;background:#fff;
+  border-radius:16px;padding:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+#qr-canvas{width:192px;height:192px;}
+.qr-url-box {
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:10px 14px;
+  font-family:var(--mono);font-size:.82rem;color:var(--text);
+  width:100%;max-width:480px;
+}
+.qr-url-box span{flex:1;word-break:break-all;}
+.copy-btn {
+  padding:5px 12px;border-radius:6px;background:var(--panel);
+  border:1px solid var(--border);color:var(--muted2);
+  font-size:.7rem;font-weight:700;cursor:pointer;transition:all .15s;
+  font-family:var(--font);white-space:nowrap;
+}
+.copy-btn:hover{color:var(--gold);border-color:rgba(240,180,41,.35);}
+.copy-btn.ok{color:var(--green);border-color:rgba(0,224,150,.35);background:rgba(0,224,150,.08);}
+.qr-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.qr-dl-btn {
+  padding:10px 20px;border-radius:var(--r);border:none;cursor:pointer;
+  font-family:var(--font);font-size:.8rem;font-weight:700;letter-spacing:.4px;
+  transition:all .14s;
+}
+.qr-dl-btn.png{background:var(--blue);color:#fff;}
+.qr-dl-btn.svg-btn{background:var(--card);border:1px solid var(--border);color:var(--text);}
+.qr-dl-btn:hover{opacity:.85;}
+.qr-empty{text-align:center;padding:40px;color:var(--muted2);}
+.qr-empty .qe-icon{font-size:2.5rem;margin-bottom:12px;}
+.qr-empty p{font-size:.85rem;line-height:1.6;}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed;bottom:24px;right:24px;
+  padding:12px 20px;background:var(--panel);border:1px solid var(--border);
+  border-radius:10px;font-size:.82rem;font-weight:600;z-index:9999;
+  transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:rgba(0,224,150,.4);color:var(--green);}
+.toast.error{border-color:rgba(255,60,60,.4);color:var(--accent);}
+
+/* ── PREVIEW LINK ── */
+.preview-link {
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;background:rgba(240,180,41,.08);
+  border:1px solid rgba(240,180,41,.25);border-radius:8px;
+  font-size:.78rem;font-weight:700;color:var(--gold);
+  text-decoration:none;transition:all .15s;margin-bottom:20px;
+}
+.preview-link:hover{background:rgba(240,180,41,.15);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">LABRIOLAG</div>
+    <div class="login-sub">CARDÁPIO DIGITAL · PAINEL DO COMERCIANTE</div>
+    <div class="login-card">
+      <div class="lc-title">Acesso ao painel</div>
+      <div class="lc-sub">Digite sua API Key para continuar</div>
+      <label class="field-label">API Key</label>
+      <input class="field-input" id="key-inp" type="password" placeholder="sk_lab_..." autocomplete="off">
+      <button class="btn-primary" id="login-btn">ENTRAR</button>
+      <div class="login-err" id="login-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">LABRIOLAG <span>CARDÁPIO v8</span></div>
+    <div class="topbar-sep"></div>
+    <div class="user-badge">
+      <div class="ub-owner" id="ub-owner">—</div>
+      <div class="ub-tier" id="ub-tier">—</div>
+      <div class="credits-badge" id="ub-credits">— ✦</div>
+      <div class="credits-badge" id="ub-qrcredits" style="background:rgba(240,180,41,.08);color:var(--gold);border-color:rgba(240,180,41,.2)">— QR</div>
+    </div>
+    <button class="btn-logout" id="logout-btn">Sair</button>
+  </div>
+
+  <div class="workspace">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="nav-section">Cardápio</div>
+      <button class="nav-btn active" data-section="info"><span class="ni">🏪</span> Informações</button>
+      <button class="nav-btn" data-section="horarios"><span class="ni">🕐</span> Horários</button>
+      <button class="nav-btn" data-section="entrega"><span class="ni">🛵</span> Entrega</button>
+      <button class="nav-btn" data-section="itens"><span class="ni">🍽️</span> Cardápio / Itens</button>
+      <div class="nav-section">Publicação</div>
+      <button class="nav-btn" data-section="qrcode"><span class="ni">📱</span> QR Code</button>
+      <div class="sidebar-spacer"></div>
+      <button class="save-all-btn" id="save-btn">💾 SALVAR TUDO</button>
+      <div class="save-status" id="save-status"></div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+      <!-- ── INFORMAÇÕES ── -->
+      <div class="section active" id="section-info">
+        <div class="section-title">INFORMAÇÕES</div>
+        <div class="section-sub">Dados básicos do seu estabelecimento</div>
+
+        <div class="form-card">
+          <div class="fc-title">Identificação</div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label">Nome do estabelecimento *</label>
+              <input class="field-input" id="f-nome" placeholder="Ex: Pizzaria do João">
+            </div>
+            <div class="field-group">
+              <label class="field-label">URL do cardápio (slug)</label>
+              <input class="field-input" id="f-slug" placeholder="auto" style="font-family:var(--mono)">
+            </div>
+          </div>
+          <div class="field-group" style="margin-top:14px">
+            <label class="field-label">Descrição curta</label>
+            <input class="field-input" id="f-desc" placeholder="Ex: Pizzas artesanais desde 1999">
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="fc-title">Contato & Localização</div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label">WhatsApp / Telefone</label>
+              <input class="field-input" id="f-tel" placeholder="(31) 99999-9999 — usado para receber pedidos">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Instagram</label>
+              <input class="field-input" id="f-ig" placeholder="@seuperfil">
+            </div>
+          </div>
+          <div class="field-group" style="margin-top:14px">
+            <label class="field-label">Endereço</label>
+            <input class="field-input" id="f-end" placeholder="Rua Exemplo, 123 — Bairro, Cidade">
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="fc-title">Visual</div>
+          <div class="grid-2">
+            <div class="field-group">
+              <label class="field-label">URL da Logo (imagem)</label>
+              <input class="field-input" id="f-logo" placeholder="https://...">
+            </div>
+            <div class="field-group">
+              <label class="field-label">Cor principal</label>
+              <div class="color-row">
+                <input type="color" class="color-input" id="f-cor-pick" value="#ff3c3c">
+                <input class="field-input color-hex" id="f-cor" value="#ff3c3c" placeholder="#ff3c3c">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HORÁRIOS ── -->
+      <div class="section" id="section-horarios">
+        <div class="section-title">HORÁRIOS</div>
+        <div class="section-sub">Configure os dias e horários de funcionamento</div>
+        <div class="form-card">
+          <div class="fc-title">Dias de funcionamento</div>
+          <div class="dias-grid" id="dias-grid">
+            <!-- injetado via JS -->
+          </div>
+          <div class="horario-row">
+            <div>
+              <label class="field-label">Abertura</label>
+              <input class="field-input time-inp" id="h-abre" type="time" value="08:00">
+            </div>
+            <div>
+              <label class="field-label">Fechamento</label>
+              <input class="field-input time-inp" id="h-fecha" type="time" value="22:00">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ENTREGA ── -->
+      <div class="section" id="section-entrega">
+        <div class="section-title">ENTREGA</div>
+        <div class="section-sub">Defina as taxas por bairro/região</div>
+        <div class="form-card">
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="entrega-ativa">
+              <div class="toggle-track"></div>
+              <div class="toggle-thumb"></div>
+            </label>
+            <span class="toggle-label">Entrega ativa</span>
+          </div>
+          <div id="bairros-list"></div>
+          <button class="add-row" id="add-bairro-btn">+ Adicionar bairro / região</button>
+        </div>
+      </div>
+
+      <!-- ── ITENS ── -->
+      <div class="section" id="section-itens">
+        <div class="section-title">CARDÁPIO</div>
+        <div class="section-sub">Organize categorias e adicione seus produtos</div>
+        <div id="categorias-list"></div>
+        <button class="add-cat-btn" id="add-cat-btn">+ Nova categoria</button>
+      </div>
+
+      <!-- ── QR CODE ── -->
+      <div class="section" id="section-qrcode">
+        <div class="section-title">QR CODE</div>
+        <div class="section-sub">Ative e imprima o QR Code do seu cardápio</div>
+
+        <!-- Bloco de ativação v8 -->
+        <div class="form-card" id="qr-ativacao-box">
+          <div class="fc-title">Ativação do QR Code</div>
+          <div id="qr-status-info" style="margin-bottom:16px;font-size:.85rem;color:var(--muted2);">
+            Carregando status…
+          </div>
+          <!-- Botão ativar (visível só se não ativado) -->
+          <div id="qr-ativar-panel" style="display:none;">
+            <div style="background:rgba(240,180,41,.07);border:1px solid rgba(240,180,41,.2);border-radius:10px;padding:16px;margin-bottom:16px;">
+              <div style="font-size:.78rem;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">💳 Custo de Ativação</div>
+              <div style="font-size:1.3rem;font-weight:800;color:var(--gold)">R$ 2,50 <span style="font-size:.8rem;font-weight:400;color:var(--muted2)">= 1 crédito de QR</span></div>
+              <div style="font-size:.78rem;color:var(--muted2);margin-top:6px;">O QR Code permanece ativo para sempre. Edições no cardápio são gratuitas.</div>
+            </div>
+            <button class="btn-primary" id="ativar-qr-btn" style="background:var(--gold);color:#111;font-weight:900;">
+              🚀 ATIVAR QR CODE (1 crédito)
+            </button>
+            <div id="ativar-status" style="margin-top:10px;font-size:.8rem;color:var(--muted2);"></div>
+          </div>
+          <!-- Badge ativo -->
+          <div id="qr-ativo-badge" style="display:none;align-items:center;gap:10px;padding:14px;background:rgba(0,224,150,.07);border:1px solid rgba(0,224,150,.2);border-radius:10px;margin-bottom:16px;">
+            <span style="font-size:1.4rem">✅</span>
+            <div>
+              <div style="font-weight:700;color:var(--green);font-size:.9rem;">QR Code Ativo</div>
+              <div id="qr-ativo-data" style="font-size:.75rem;color:var(--muted2);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR visual (só aparece quando ativo) -->
+        <div class="qr-box" id="qr-box">
+          <div class="qr-empty" id="qr-empty">
+            <div class="qe-icon">📱</div>
+            <p>Salve o cardápio e ative o QR Code<br>para visualizar aqui.</p>
+          </div>
+          <div id="qr-content" style="display:none;width:100%;display:flex;flex-direction:column;align-items:center;gap:20px;">
+            <div class="qr-frame"><div id="qr-canvas"></div></div>
+            <div class="qr-url-box">
+              <span id="qr-url-txt">—</span>
+              <button class="copy-btn" id="copy-url-btn">Copiar</button>
+            </div>
+            <div class="qr-actions">
+              <button class="qr-dl-btn png" id="dl-png-btn">⬇ Baixar PNG</button>
+              <button class="qr-dl-btn svg-btn" id="open-menu-btn">🔗 Abrir cardápio</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+  </div><!-- /workspace -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG — altere para apontar para o seu Worker
+// ══════════════════════════════════════════════════════════════
+const API = 'https://labx-worker-v8.SEU-SUBDOMINIO.workers.dev';
+// OU se estiver servindo no mesmo domínio:
+// const API = '';
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let KEY = '';
+let PROFILE = null;
+let DATA = {
+  nomeLoja:'', descricao:'', telefone:'', endereco:'', instagram:'',
+  corPrimaria:'#ff3c3c', logo:'', slug:'',
+  horarios:{ diasAtivos:['Seg','Ter','Qua','Qui','Sex'], abre:'08:00', fecha:'22:00' },
+  entrega:{ ativa:false, taxas:[] },
+  categorias:[]
+};
+let menuUrl = '';
+
+// ══════════════════════════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════════════════════════
+document.getElementById('key-inp').addEventListener('keydown', e => {
+  if(e.key==='Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const k = document.getElementById('key-inp').value.trim();
+  if(!k) return;
+  document.getElementById('login-btn').textContent = 'Verificando...';
+  try {
+    const res = await fetch(`${API}/me`, { headers:{'X-API-Key':k} });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Chave inválida');
+    KEY = k;
+    PROFILE = data;
+    iniciarApp();
+  } catch(e) {
+    const el = document.getElementById('login-err');
+    el.textContent = e.message;
+    el.style.display = 'block';
+  } finally {
+    document.getElementById('login-btn').textContent = 'ENTRAR';
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  INICIAR APP
+// ══════════════════════════════════════════════════════════════
+async function iniciarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+
+  // Perfil na topbar
+  document.getElementById('ub-owner').textContent = PROFILE.owner;
+  const tierEl = document.getElementById('ub-tier');
+  tierEl.textContent = PROFILE.tier.toUpperCase();
+  tierEl.className = `ub-tier tier-${PROFILE.tier}`;
+  document.getElementById('ub-credits').textContent   = `${PROFILE.credits} créditos ✦`;
+  document.getElementById('ub-qrcredits').textContent = `${PROFILE.qrCredits ?? 0} QR`;
+
+  // Dias
+  renderDias();
+
+  // Carregar cardápio existente
+  try {
+    const res = await fetch(`${API}/cardapio/meu`, { headers:{'X-API-Key':KEY} });
+    const d = await res.json();
+    if(d.existe) {
+      DATA = { ...DATA, ...d };
+      preencherFormulario();
+      atualizarStatusQR(d.qrAtivado, d.qrAtivadoEm, d.qrCredits);
+    } else {
+      atualizarStatusQR(false, null, PROFILE.qrCredits ?? 0);
+    }
+  } catch(e) {
+    atualizarStatusQR(false, null, PROFILE.qrCredits ?? 0);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-btn[data-section]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`section-${btn.dataset.section}`).classList.add('active');
+  });
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  KEY=''; PROFILE=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('key-inp').value='';
+});
+
+// ══════════════════════════════════════════════════════════════
+//  DIAS
+// ══════════════════════════════════════════════════════════════
+const DIAS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function renderDias() {
+  const grid = document.getElementById('dias-grid');
+  grid.innerHTML = '';
+  DIAS.forEach(d => {
+    const chip = document.createElement('div');
+    chip.className = 'dia-chip' + (DATA.horarios.diasAtivos.includes(d) ? ' on' : '');
+    chip.textContent = d;
+    chip.addEventListener('click', () => {
+      const idx = DATA.horarios.diasAtivos.indexOf(d);
+      if(idx>=0) DATA.horarios.diasAtivos.splice(idx,1);
+      else DATA.horarios.diasAtivos.push(d);
+      chip.classList.toggle('on');
+    });
+    grid.appendChild(chip);
+  });
+  document.getElementById('h-abre').value  = DATA.horarios.abre  || '08:00';
+  document.getElementById('h-fecha').value = DATA.horarios.fecha || '22:00';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ENTREGA
+// ══════════════════════════════════════════════════════════════
+document.getElementById('entrega-ativa').addEventListener('change', function() {
+  DATA.entrega.ativa = this.checked;
+});
+
+document.getElementById('add-bairro-btn').addEventListener('click', () => {
+  DATA.entrega.taxas.push({ bairro:'', taxa: '' });
+  renderBairros();
+});
+
+function renderBairros() {
+  const list = document.getElementById('bairros-list');
+  list.innerHTML = '';
+  document.getElementById('entrega-ativa').checked = DATA.entrega.ativa;
+  DATA.entrega.taxas.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'bairro-row';
+    row.innerHTML = `
+      <input class="field-input" placeholder="Bairro / Região" value="${t.bairro||''}"
+        oninput="DATA.entrega.taxas[${i}].bairro=this.value">
+      <input class="field-input" placeholder="R$ taxa" value="${t.taxa||''}" style="text-align:center"
+        oninput="DATA.entrega.taxas[${i}].taxa=this.value">
+      <button class="del-btn" onclick="DATA.entrega.taxas.splice(${i},1);renderBairros()">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CATEGORIAS & ITENS
+// ══════════════════════════════════════════════════════════════
+document.getElementById('add-cat-btn').addEventListener('click', () => {
+  DATA.categorias.push({ nome:'Nova categoria', aberto:true, itens:[] });
+  renderCategorias();
+});
+
+function renderCategorias() {
+  const list = document.getElementById('categorias-list');
+  list.innerHTML = '';
+  DATA.categorias.forEach((cat, ci) => {
+    const div = document.createElement('div');
+    div.className = 'categoria-card';
+    div.innerHTML = `
+      <div class="categoria-head">
+        <span class="cat-drag">⠿</span>
+        <input class="field-input cat-name-inp" value="${esc(cat.nome)}"
+          oninput="DATA.categorias[${ci}].nome=this.value">
+        <span class="cat-count">${cat.itens.length} itens</span>
+        <button class="cat-toggle-btn ${cat.aberto?'open':''}"
+          onclick="DATA.categorias[${ci}].aberto=!DATA.categorias[${ci}].aberto;renderCategorias()">
+          ${cat.aberto?'▲ Fechar':'▼ Abrir'}
+        </button>
+        <button class="del-btn" onclick="DATA.categorias.splice(${ci},1);renderCategorias()">✕</button>
+      </div>
+      <div class="categoria-body ${cat.aberto?'open':''}">
+        ${cat.itens.map((item, ii) => renderItem(ci, ii, item)).join('')}
+        <button class="add-item-btn" onclick="addItem(${ci})">+ Adicionar item</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function renderItem(ci, ii, item) {
+  return `
+    <div class="item-card">
+      <button class="item-del" onclick="DATA.categorias[${ci}].itens.splice(${ii},1);renderCategorias()">✕</button>
+      <div class="item-row">
+        <div>
+          <label class="field-label">Nome</label>
+          <input class="field-input" value="${esc(item.nome||'')}"
+            oninput="DATA.categorias[${ci}].itens[${ii}].nome=this.value" placeholder="Ex: X-Burguer">
+        </div>
+        <div>
+          <label class="field-label">Preço</label>
+          <input class="field-input" value="${esc(item.preco||'')}"
+            oninput="DATA.categorias[${ci}].itens[${ii}].preco=this.value" placeholder="29,90">
+        </div>
+        <div>
+          <label class="field-label">Serve</label>
+          <input class="field-input" value="${esc(item.serve||'')}"
+            oninput="DATA.categorias[${ci}].itens[${ii}].serve=this.value" placeholder="1-2 pessoas">
+        </div>
+      </div>
+      <textarea class="field-input item-desc-inp"
+        oninput="DATA.categorias[${ci}].itens[${ii}].descricao=this.value"
+        placeholder="Descrição do item (ingredientes, modo de preparo...)">${esc(item.descricao||'')}</textarea>
+      <div>
+        <label class="field-label">URL da imagem (opcional)</label>
+        <input class="field-input item-img-inp" value="${esc(item.imagem||'')}"
+          oninput="DATA.categorias[${ci}].itens[${ii}].imagem=this.value" placeholder="https://...">
+      </div>
+      <div class="item-badges">
+        <button class="badge-btn ${item.novo?'on-novo':''}"
+          onclick="toggleBadge(${ci},${ii},'novo')">NOVO</button>
+        <button class="badge-btn ${item.destaque?'on-destaque':''}"
+          onclick="toggleBadge(${ci},${ii},'destaque')">⭐ DESTAQUE</button>
+        <button class="badge-btn ${item.inativo?'on-inativo':''}"
+          onclick="toggleBadge(${ci},${ii},'inativo')">ESGOTADO</button>
+      </div>
+    </div>
+  `;
+}
+
+function addItem(ci) {
+  DATA.categorias[ci].itens.push({ nome:'', descricao:'', preco:'', serve:'', imagem:'', novo:false, destaque:false, inativo:false });
+  renderCategorias();
+}
+
+function toggleBadge(ci, ii, badge) {
+  DATA.categorias[ci].itens[ii][badge] = !DATA.categorias[ci].itens[ii][badge];
+  renderCategorias();
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  COR
+// ══════════════════════════════════════════════════════════════
+document.getElementById('f-cor-pick').addEventListener('input', function() {
+  document.getElementById('f-cor').value = this.value;
+  DATA.corPrimaria = this.value;
+});
+document.getElementById('f-cor').addEventListener('input', function() {
+  if(/^#[0-9a-fA-F]{6}$/.test(this.value)) {
+    document.getElementById('f-cor-pick').value = this.value;
+    DATA.corPrimaria = this.value;
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  SALVAR
+// ══════════════════════════════════════════════════════════════
+document.getElementById('save-btn').addEventListener('click', async () => {
+  coletarFormulario();
+  const st = document.getElementById('save-status');
+  document.getElementById('save-btn').textContent = '⏳ Salvando...';
+  try {
+    const res = await fetch(`${API}/cardapio/salvar`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-API-Key':KEY},
+      body: JSON.stringify(DATA)
+    });
+    const d = await res.json();
+    if(!res.ok) throw new Error(d.error || 'Erro ao salvar');
+    DATA.slug = d.slug;
+    // v8: salvar NÃO ativa o QR automaticamente
+    menuUrl = d.menuUrl;
+    st.textContent = '✓ Salvo em ' + new Date().toLocaleTimeString('pt-BR');
+    toast('Cardápio salvo! Vá em QR Code para ativar.', 'success');
+    // Atualiza status QR com dados retornados
+    atualizarStatusQR(d.qrAtivado, null, d.qrCredits);
+    if(d.qrAtivado) gerarQR();
+  } catch(e) {
+    toast(e.message, 'error');
+    st.textContent = '✕ Falha ao salvar';
+  } finally {
+    document.getElementById('save-btn').textContent = '💾 SALVAR TUDO';
+  }
+});
+
+function coletarFormulario() {
+  DATA.nomeLoja = document.getElementById('f-nome').value.trim();
+  DATA.descricao = document.getElementById('f-desc').value.trim();
+  // Telefone: salva apenas dígitos — garante compatibilidade com wa.me/55NUMERO
+  DATA.telefone = document.getElementById('f-tel').value.replace(/\D/g,'');
+  DATA.instagram = document.getElementById('f-ig').value.trim();
+  DATA.endereco = document.getElementById('f-end').value.trim();
+  DATA.logo = document.getElementById('f-logo').value.trim();
+  DATA.corPrimaria = document.getElementById('f-cor').value.trim() || '#ff3c3c';
+  const slugRaw = document.getElementById('f-slug').value.trim();
+  if(slugRaw) DATA.slug = slugRaw;
+  DATA.horarios.abre  = document.getElementById('h-abre').value;
+  DATA.horarios.fecha = document.getElementById('h-fecha').value;
+  DATA.entrega.ativa = document.getElementById('entrega-ativa').checked;
+}
+
+function preencherFormulario() {
+  document.getElementById('f-nome').value = DATA.nomeLoja  || '';
+  document.getElementById('f-desc').value = DATA.descricao || '';
+  // Exibe telefone formatado visualmente (o valor salvo é só dígitos)
+  const tel = DATA.telefone || '';
+  document.getElementById('f-tel').value  = tel;
+  document.getElementById('f-ig').value   = DATA.instagram || '';
+  document.getElementById('f-end').value  = DATA.endereco  || '';
+  document.getElementById('f-logo').value = DATA.logo      || '';
+  document.getElementById('f-cor').value  = DATA.corPrimaria || '#ff3c3c';
+  document.getElementById('f-cor-pick').value = DATA.corPrimaria || '#ff3c3c';
+  document.getElementById('f-slug').value = DATA.slug || '';
+  renderDias();
+  renderBairros();
+  renderCategorias();
+  if(DATA.slug) {
+    menuUrl = `${API.replace('/api','')}/menu/${DATA.slug}`;
+    if(DATA.qrAtivado) gerarQR();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STATUS QR (v8)
+// ══════════════════════════════════════════════════════════════
+function atualizarStatusQR(ativo, ativadoEm, qrCredits) {
+  const info      = document.getElementById('qr-status-info');
+  const ativarPnl = document.getElementById('qr-ativar-panel');
+  const ativoBadge= document.getElementById('qr-ativo-badge');
+  const ativoData = document.getElementById('qr-ativo-data');
+  const qrBadge   = document.getElementById('ub-qrcredits');
+
+  // Atualiza badge topbar
+  if(qrBadge) qrBadge.textContent = `${qrCredits ?? 0} QR`;
+
+  if(ativo) {
+    info.textContent = 'Seu cardápio está público e acessível via QR Code.';
+    ativarPnl.style.display  = 'none';
+    ativoBadge.style.display = 'flex';
+    if(ativadoEm) {
+      ativoData.textContent = 'Ativado em ' + new Date(ativadoEm).toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+    }
+  } else {
+    const temSaldo = (qrCredits ?? 0) >= 1;
+    const temCardapio = !!DATA.slug;
+    if(!temCardapio) {
+      info.textContent = 'Salve o cardápio primeiro, depois ative o QR Code.';
+      ativarPnl.style.display  = 'none';
+    } else if(!temSaldo) {
+      info.innerHTML = `<span style="color:var(--accent)">⚠ Saldo de QR insuficiente.</span> Adquira créditos em <a href="https://labriolag.shop" target="_blank" style="color:var(--gold)">labriolag.shop</a>.`;
+      ativarPnl.style.display  = 'none';
+    } else {
+      info.textContent = `Cardápio salvo. Ative o QR Code para torná-lo público. Saldo: ${qrCredits} crédito(s).`;
+      ativarPnl.style.display  = 'block';
+    }
+    ativoBadge.style.display = 'none';
+  }
+}
+
+document.getElementById('ativar-qr-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('ativar-qr-btn');
+  const st  = document.getElementById('ativar-status');
+  btn.textContent = '⏳ Ativando...';
+  btn.disabled    = true;
+  st.textContent  = '';
+  try {
+    const res = await fetch(`${API}/cardapio/ativar-qr`, {
+      method: 'POST',
+      headers: { 'X-API-Key': KEY }
+    });
+    const d = await res.json();
+    if(!res.ok) throw new Error(d.error || 'Erro ao ativar');
+    menuUrl = d.menuUrl;
+    toast(d.jaAtivado ? 'QR Code já estava ativo!' : '✅ QR Code ativado com sucesso!', 'success');
+    // Atualiza badge de créditos
+    document.getElementById('ub-qrcredits').textContent = `${d.qrCredits} QR`;
+    atualizarStatusQR(true, d.activatedAt || new Date().toISOString(), d.qrCredits);
+    gerarQR();
+  } catch(e) {
+    toast(e.message, 'error');
+    st.textContent = '✕ ' + e.message;
+  } finally {
+    btn.textContent = '🚀 ATIVAR QR CODE (1 crédito)';
+    btn.disabled    = false;
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  QR CODE
+// ══════════════════════════════════════════════════════════════
+let qrObj = null;
+function gerarQR() {
+  if(!menuUrl) return;
+  document.getElementById('qr-empty').style.display = 'none';
+  const content = document.getElementById('qr-content');
+  content.style.display = 'flex';
+
+  document.getElementById('qr-url-txt').textContent = menuUrl;
+  document.getElementById('open-menu-btn').onclick = () => window.open(menuUrl, '_blank');
+
+  const canvas = document.getElementById('qr-canvas');
+  canvas.innerHTML = '';
+  qrObj = new QRCode(canvas, {
+    text: menuUrl, width:192, height:192,
+    colorDark:'#000', colorLight:'#fff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+document.getElementById('copy-url-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(menuUrl).then(() => {
+    const btn = document.getElementById('copy-url-btn');
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('ok');
+    setTimeout(()=>{ btn.textContent='Copiar'; btn.classList.remove('ok'); }, 2000);
+  });
+});
+
+document.getElementById('dl-png-btn').addEventListener('click', () => {
+  const img = document.querySelector('#qr-canvas img');
+  if(!img) return;
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = `qrcode-${DATA.slug||'cardapio'}.png`;
+  a.click();
+});
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════
+let toastTimer;
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = (type==='success'?'✓ ':'✕ ') + msg;
+  el.className = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
