@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LabFood OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="main-header">
+    <div id="logo-area" onclick="app.secretLogin()">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">LabFood<em>OS</em></span>
+      <span id="secret-dot" class="secret-dot"></span>
+    </div>
+    <div id="header-actions"></div>
+  </header>
+
+  <main id="viewport"></main>
+
+  <div id="cartFab" style="display:none" onclick="totem.toggleCart()">
+    <span>🛒</span>
+    <div id="cartCount">0</div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="js/state.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/totem.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
