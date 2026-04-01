@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabFood OS - Sistema de Restaurante</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#DA291C">
+    <style>
+        :root {
+            --color-primary: #FFCC00;
+            --color-secondary: #DA291C;
+            --bg: #fff;
+            --font: 'Inter', sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin:0;
+            font-family:var(--font);
+            background:var(--bg);
+            color:#333;
+        }
+        header {
+            background:var(--color-secondary);
+            color:#fff;
+            padding:12px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        header h1 {
+            margin:0;
+            font-size:1.2rem;
+            font-weight:bold;
+        }
+        button {
+            padding:8px 16px;
+            margin:4px 2px;
+            border:none;
+            border-radius:24px;
+            cursor:pointer;
+            font-weight:600;
+            transition:all 0.2s ease-in-out;
+        }
+        button:hover {
+            transform:translateY(-1px);
+            box-shadow:0 2px 4px rgba(0,0,0,0.2);
+        }
+        .btn-primary {background:var(--color-primary);color:#000;}
+        .btn-secondary {background:var(--color-secondary);color:#fff;}
+        .btn-ghost {background:transparent;color:var(--color-secondary);border:1px solid var(--color-secondary);}
+        .btn-danger {background:#e53e3e;color:#fff;}
+        .btn-success {background:#4CAF50;color:#fff;}
+        .input-field {
+            width:calc(100% - 16px);
+            padding:8px;
+            margin:4px 0;
+            border:1px solid #ccc;
+            border-radius:8px;
+        }
+        select.input-field {
+            width:100%;
+        }
+        textarea.input-field {
+            width:100%;
+            resize: vertical;
+        }
+        .card-item {
+            border:1px solid #ddd;
+            border-radius:8px;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+            cursor:pointer;
+            transition:transform 0.2s;
+            background: #fff;
+        }
+        .card-item:hover {transform:scale(1.02);}
+        .card-item .thumb img {
+            width:100%;
+            height:120px;
+            object-fit:cover;
+        }
+        .drawer {
+            position:fixed;
+            top:0;
+            right:-100%;
+            width:90%;
+            max-width: 380px;
+            height:100%;
+            background:#fff;
+            box-shadow:-2px 0 8px rgba(0,0,0,.3);
+            transition:0.3s;
+            padding:12px;
+            overflow-y:auto;
+            z-index:1000;
+        }
+        .drawer.open {right:0;}
+        .screen {
+            padding:12px;
+            display:none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .screen.active {
+            display:block;
+        }
+        .small {font-size:0.75rem;color:#555;}
+        .kv {font-size:0.7rem;color:#999;}
+        .hr {border-top:1px solid #ccc;margin:6px 0;}
+        #cartFab {
+            position:fixed;
+            bottom:16px;
+            right:16px;
+            background:var(--color-primary);
+            border-radius:50%;
+            width:56px;
+            height:56px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            cursor:pointer;
+            box-shadow:0 2px 6px rgba(0,0,0,0.3);
+            z-index:90;
+            font-size: 1.5rem;
+        }
+        #cartCount {
+            position:absolute;
+            top:-4px;
+            right:-4px;
+            background:red;
+            color:#fff;
+            border-radius:50%;
+            width:20px;
+            height:20px;
+            font-size:0.7rem;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .tabs-container {
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-bottom:12px;
+        }
+        .tab-btn {
+            padding:8px 16px;
+            border-radius:24px;
+            cursor:pointer;
+            background:#eee;
+            border: none;
+        }
+        .tab-btn.active {
+            background:var(--color-secondary);
+            color:#fff;
+        }
+        .tab-content {display:none;}
+        .tab-content.active {display:block;}
+        .table-data {
+            width:100%;
+            border-collapse:collapse;
+            font-size:0.8rem;
+            text-align:left;
+            overflow-x: auto;
+            display: block;
+        }
+        .table-data th, .table-data td {
+            border:1px solid #ccc;
+            padding:6px;
+        }
+        .table-data th {
+            background:#f0f0f0;
+        }
+        .toast {
+            position:fixed;
+            top:20px;
+            left:50%;
+            transform:translateX(-50%);
+            padding:12px 24px;
+            background:rgba(0,0,0,0.8);
+            color:#fff;
+            border-radius:24px;
+            z-index:1001;
+            opacity:0;
+            transition:opacity 0.3s ease-in-out;
+            pointer-events:none;
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity:1;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0;
+        }
+        .filter-tab {
+            white-space: nowrap;
+            padding: 8px 12px;
+            background: #f0f0f0;
+            border-radius: 24px;
+            cursor: pointer;
+        }
+        .filter-tab.active {
+            background: var(--color-secondary);
+            color: #fff;
+        }
+        .status-pending { background: #ffebee; border-left: 4px solid #e53e3e; }
+        .status-preparing { background: #fff3e0; border-left: 4px solid #fd7e14; }
+        .status-ready { background: #e8f5e9; border-left: 4px solid #4CAF50; }
+        .order-card {
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .kitchen-grid {
+            display: grid;
+            gap: 12px;
+        }
+        @media (max-width: 768px) {
+            .table-data {
+                font-size: 0.7rem;
+            }
+            .table-data th, .table-data td {
+                padding: 4px;
+            }
+            .btn-action {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<header>
+    <h1>🍽️ LabFood OS</h1>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="switchToKitchen()" style="background:rgba(255,255,255,0.2);color:#fff;">🍳 Cozinha</button>
+        <div id="userInfo"></div>
+    </div>
+</header>
+<main>
+    <!-- Tela de Login -->
+    <div id="loginScreen" class="screen active">
+        <h2>🔐 Login</h2>
+        <input type="text" id="loginKey" placeholder="Key" class="input-field">
+        <input type="password" id="loginPass" placeholder="Senha" class="input-field">
+        <button class="btn-primary" onclick="login()">Entrar</button>
+        <button class="btn-ghost" onclick="registerUser()">Cadastrar</button>
+        <button class="btn-ghost" onclick="guestLogin()">Entrar como Visitante</button>
+    </div>
+
+    <!-- Tela do Totem/Cardápio -->
+    <div id="totemScreen" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+            <h2 style="margin:0;">📋 Cardápio</h2>
+            <button class="btn-ghost" onclick="toAdminPanel()" id="manageBtn" style="display:none;">⚙️ Gerenciar</button>
+        </div>
+        <div id="categoryTabs" class="filter-tabs"></div>
+        <div id="subcategoryTabs" class="filter-tabs" style="display:none;"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:8px;" id="totemGrid"></div>
+    </div>
+
+    <!-- Tela da Cozinha (integrada) -->
+    <div id="kitchenScreen" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+            <h2>🍳 Cozinha - Pedidos em Andamento</h2>
+            <button class="btn-ghost" onclick="toTotem()">← Voltar ao Cardápio</button>
+        </div>
+        <div style="display:flex;gap:12px;margin:12px 0;flex-wrap:wrap;">
+            <div class="counter" style="background:#ffebee;padding:8px 16px;border-radius:8px;">
+                <strong>⏳ Aguardando:</strong> <span id="cnt-pending">0</span>
+            </div>
+            <div class="counter" style="background:#fff3e0;padding:8px 16px;border-radius:8px;">
+                <strong>🍳 Preparando:</strong> <span id="cnt-preparing">0</span>
+            </div>
+            <div class="counter" style="background:#e8f5e9;padding:8px 16px;border-radius:8px;">
+                <strong>✅ Prontos:</strong> <span id="cnt-ready">0</span>
+            </div>
+        </div>
+        <div id="kitchenOrders" class="kitchen-grid"></div>
+        <div id="kitchenEmpty" style="text-align:center;padding:40px;color:#999;">
+            ✨ Nenhum pedido pendente
+        </div>
+    </div>
+
+    <!-- Tela Admin -->
+    <div id="adminScreen" class="screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+            <h2 style="margin:0;">📊 Dashboard</h2>
+            <button class="btn-ghost" onclick="toTotem()">← Totem</button>
+        </div>
+        <div class="tabs-container" id="adminTabs"></div>
+        
+        <div id="tab-dashboard" class="tab-content">
+            <h3>Resumo</h3>
+            <div id="dashboardSummary"></div>
+            <h3>Pedidos Recentes</h3>
+            <div id="ordersList"></div>
+            <hr class="hr">
+            <h3>Histórico Completo</h3>
+            <div style="overflow-x:auto;">
+                <table class="table-data" id="ordersTable">...</table>
+            </div>
+        </div>
+        
+        <div id="tab-products" class="tab-content">
+            <h3>Gerenciar Produtos</h3>
+            <form id="prodForm">
+                <input type="hidden" id="prodId">
+                <input type="text" id="prodName" placeholder="Nome" class="input-field" required>
+                <input type="number" id="prodPrice" placeholder="Preço" class="input-field" step="0.01" required>
+                <input type="text" id="prodCat" placeholder="Categoria" class="input-field">
+                <input type="text" id="prodSubcat" placeholder="Subcategoria" class="input-field">
+                <input type="number" id="prodStock" placeholder="Estoque" class="input-field" required>
+                <input type="text" id="prodImg" placeholder="URL da imagem" class="input-field">
+                <button type="submit" class="btn-primary">💾 Salvar</button>
+                <button type="button" class="btn-ghost" onclick="resetForm('prodForm')">Limpar</button>
+            </form>
+            <hr class="hr">
+            <div style="overflow-x:auto;">
+                <table class="table-data" id="prodTable">...</table>
+            </div>
+        </div>
+        
+        <div id="tab-people" class="tab-content">
+            <h3>👥 Gerenciar Pessoas</h3>
+            <form id="personForm">
+                <input type="hidden" id="personId">
+                <input type="text" id="personName" placeholder="Nome" class="input-field">
+                <input type="tel" id="personPhone" placeholder="Telefone" class="input-field">
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button type="button" class="btn-ghost" onclick="resetForm('personForm')">Limpar</button>
+            </form>
+            <hr class="hr">
+            <div style="overflow-x:auto;">
+                <table class="table-data" id="peopleTable">...</table>
+            </div>
+        </div>
+        
+        <div id="tab-coupons" class="tab-content">
+            <h3>🏷️ Gerenciar Cupons</h3>
+            <form id="couponForm">
+                <input type="hidden" id="couponId">
+                <input type="text" id="couponCode" placeholder="Código" class="input-field">
+                <input type="number" id="couponValue" placeholder="Valor (R$)" class="input-field" step="0.01">
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button type="button" class="btn-ghost" onclick="resetForm('couponForm')">Limpar</button>
+            </form>
+            <hr class="hr">
+            <div style="overflow-x:auto;">
+                <table class="table-data" id="couponsTable">...</table>
+            </div>
+        </div>
+        
+        <div id="tab-keys" class="tab-content">
+            <h3>🔑 Gerenciar Keys</h3>
+            <form id="keyForm">
+                <input type="hidden" id="keyId">
+                <input type="text" id="keyKey" placeholder="Key" class="input-field">
+                <input type="text" id="keyPass" placeholder="Senha" class="input-field">
+                <select id="keyRole" class="input-field">
+                    <option value="A">Admin Master</option>
+                    <option value="B">Admin</option>
+                    <option value="C">Gerente</option>
+                    <option value="D">Garçom</option>
+                    <option value="E">Visitante</option>
+                </select>
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button type="button" class="btn-ghost" onclick="resetForm('keyForm')">Limpar</button>
+            </form>
+            <hr class="hr">
+            <div style="overflow-x:auto;">
+                <table class="table-data" id="keysTable">...</table>
+            </div>
+        </div>
+        
+        <div id="tab-settings" class="tab-content">
+            <h3>⚙️ Configurações</h3>
+            <div style="margin-bottom:8px;">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="storeOpenToggle" onchange="toggleStoreStatus()">
+                    <span class="slider"></span>
+                </label>
+                <span id="storeStatusLabel">Loja Fechada</span>
+            </div>
+            <label class="small">Nível de Estoque Baixo:</label>
+            <input type="number" id="lowStockThreshold" class="input-field" value="5">
+            <label class="small">Telefone WhatsApp:</label>
+            <input type="tel" id="waPhone" class="input-field">
+            <label class="small">Chave PIX:</label>
+            <input type="text" id="pixKey" class="input-field">
+            <label class="small">Mensagem de Pagamento:</label>
+            <textarea id="paymentMessage" class="input-field" rows="3"></textarea>
+            <button class="btn-primary" onclick="saveSetup()">💾 Salvar</button>
+            <hr class="hr">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-secondary" onclick="exportData()">📤 Exportar Dados</button>
+                <label for="importFile" class="btn-ghost">📥 Importar Dados</label>
+                <input type="file" id="importFile" style="display:none;" onchange="importData(event)">
+            </div>
+            <div style="margin-top:8px;">
+                <button class="btn-danger" onclick="resetAllData()">⚠️ Limpar Todos os Dados</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Carrinho Drawer -->
+    <div class="drawer" id="drawer">
+        <h3>🛒 Carrinho</h3>
+        <div id="cartItems" style="margin-bottom:12px;"></div>
+        <div style="font-weight:bold;margin-top:12px;">Total: R$ <span id="cartSum">0.00</span></div>
+        <button class="btn-primary" onclick="checkout()">✅ Finalizar pedido</button>
+        <button class="btn-ghost" onclick="clearCart()">🗑️ Limpar</button>
+        <button class="btn-ghost" onclick="toggleDrawer()">✖️ Fechar</button>
+    </div>
+    
+    <div id="cartFab" onclick="toggleDrawer()">
+        🛒
+        <div id="cartCount">0</div>
+    </div>
+</main>
+<div id="toast" class="toast"></div>
+
+<script>
+    // ==================== CONFIGURAÇÃO E ESTADO GLOBAL ====================
+    const LS = {
+        PRODS: 'labfood_prods',
+        PEOPLE: 'labfood_people',
+        COUPONS: 'labfood_coupons',
+        KEYS: 'labfood_keys',
+        CART: 'labfood_cart',
+        SETUP: 'labfood_setup',
+        CUSTOM: 'labfood_custom',
+        ORDERS: 'labfood_orders'
+    };
+    
+    const STATE = {
+        user: null,
+        products: [],
+        people: [],
+        coupons: [],
+        keys: [],
+        cart: { items: [] },
+        setup: { whatsapp: '', lowStockThreshold: 5, storeOpen: true, pixKey: '', paymentMessage: '' },
+        orders: [],
+        selectedCategory: 'Todos',
+        selectedSubcategory: null,
+        currentScreen: 'login'
+    };
+    
+    const ROLE_PERMISSIONS = {
+        'A': ['A', 'B', 'C', 'D', 'E'],
+        'B': ['B', 'C', 'D', 'E'],
+        'C': ['D', 'E'],
+        'D': [],
+        'E': []
+    };
+    
+    const ADMIN_TABS = [
+        { id: 'dashboard', name: '📊 Dashboard', roles: ['A', 'B', 'C'] },
+        { id: 'products', name: '🍔 Produtos', roles: ['A', 'B', 'C'] },
+        { id: 'people', name: '👥 Pessoas', roles: ['A', 'B'] },
+        { id: 'coupons', name: '🏷️ Cupons', roles: ['A', 'B'] },
+        { id: 'keys', name: '🔑 Keys', roles: ['A', 'B'] },
+        { id: 'settings', name: '⚙️ Config', roles: ['A', 'B'] }
+    ];
+    
+    // ==================== UTILITÁRIOS ====================
+    function $(id) { return document.getElementById(id); }
+    
+    function lsGet(key, defaultValue = []) {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : defaultValue;
+    }
+    
+    function lsSet(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+    }
+    
+    function genId() { return Date.now() + Math.random() * 10000; }
+    
+    function formatMoney(v) { return (v || 0).toFixed(2).replace('.', ','); }
+    
+    function toast(msg) {
+        const t = $('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    
+    function saveAll() {
+        lsSet(LS.PRODS, STATE.products);
+        lsSet(LS.PEOPLE, STATE.people);
+        lsSet(LS.COUPONS, STATE.coupons);
+        lsSet(LS.KEYS, STATE.keys);
+        lsSet(LS.CART, STATE.cart);
+        lsSet(LS.SETUP, STATE.setup);
+        lsSet(LS.ORDERS, STATE.orders);
+    }
+    
+    function loadAll() {
+        STATE.products = lsGet(LS.PRODS, []);
+        STATE.people = lsGet(LS.PEOPLE, []);
+        STATE.coupons = lsGet(LS.COUPONS, []);
+        STATE.keys = lsGet(LS.KEYS, []);
+        STATE.cart = lsGet(LS.CART, { items: [] });
+        STATE.setup = lsGet(LS.SETUP, { whatsapp: '', lowStockThreshold: 5, storeOpen: true, pixKey: '', paymentMessage: '' });
+        STATE.orders = lsGet(LS.ORDERS, []);
+        
+        // Dados iniciais
+        if (!STATE.keys.length) {
+            STATE.keys.push({ id: genId(), key: 'ADMIN', pass: 'admin123', role: 'A', active: true });
+            STATE.keys.push({ id: genId(), key: 'GARCOM', pass: '123', role: 'D', active: true });
+        }
+        
+        if (!STATE.products.length) {
+            STATE.products.push({ id: genId(), name: '🍔 Cheeseburger', price: 25.90, cat: 'Lanches', subcat: 'Sanduíches', stock: 15, img: 'https://via.placeholder.com/150/DA291C/FFFFFF?text=Cheeseburger', available: true });
+            STATE.products.push({ id: genId(), name: '🍟 Batata Frita', price: 12.90, cat: 'Acompanhamentos', subcat: 'Fritos', stock: 30, img: 'https://via.placeholder.com/150/FFCC00/000000?text=Batata', available: true });
+            STATE.products.push({ id: genId(), name: '🥤 Coca-Cola', price: 6.90, cat: 'Bebidas', subcat: 'Refrigerantes', stock: 50, img: 'https://via.placeholder.com/150/000000/FFFFFF?text=Coca', available: true });
+            STATE.products.push({ id: genId(), name: '🍕 Pizza Margherita', price: 45.90, cat: 'Pizzas', subcat: 'Salgadas', stock: 8, img: 'https://via.placeholder.com/150/DA291C/FFFFFF?text=Pizza', available: true });
+        }
+        
+        saveAll();
+    }
+    
+    // ==================== TELAS ====================
+    function switchScreen(screenId) {
+        STATE.currentScreen = screenId;
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        $(screenId).classList.add('active');
+        $('drawer').classList.remove('open');
+        
+        if (screenId === 'kitchenScreen') {
+            renderKitchen();
+        }
+    }
+    
+    function toLogin() {
+        switchScreen('loginScreen');
+        $('userInfo').innerText = '';
+        $('manageBtn').style.display = 'none';
+    }
+    
+    function toTotem() {
+        switchScreen('totemScreen');
+        if (STATE.user && (STATE.user.role === 'A' || STATE.user.role === 'B' || STATE.user.role === 'C')) {
+            $('manageBtn').style.display = 'block';
+        } else {
+            $('manageBtn').style.display = 'none';
+        }
+        renderCategories();
+    }
+    
+    function toAdminPanel() {
+        if (!STATE.user || !['A', 'B', 'C'].includes(STATE.user.role)) {
+            toast('Acesso negado');
+            return;
+        }
+        switchScreen('adminScreen');
+        renderDashboard();
+        renderAllAdminTables();
+        renderAdminTabs();
+    }
+    
+    function switchToKitchen() {
+        switchScreen('kitchenScreen');
+        renderKitchen();
+    }
+    
+    // ==================== LOGIN ====================
+    function login() {
+        const key = $('loginKey').value.trim();
+        const pass = $('loginPass').value.trim();
+        const user = STATE.keys.find(k => k.key === key && k.pass === pass && k.active);
+        if (!user) { toast('Key ou senha inválidos'); return; }
+        STATE.user = user;
+        $('userInfo').innerText = `👤 ${user.key} (${user.role})`;
+        toTotem();
+        toast('Login realizado!');
+    }
+    
+    function registerUser() {
+        const key = prompt('Escolha sua Key:');
+        if (!key) return;
+        if (STATE.keys.find(k => k.key === key)) { toast('Key já existe'); return; }
+        const pass = prompt('Escolha sua senha:');
+        if (!pass) return;
+        STATE.keys.push({ id: genId(), key, pass, role: 'D', active: true });
+        saveAll();
+        toast('Cadastro realizado! Faça login.');
+        $('loginKey').value = key;
+        $('loginPass').value = pass;
+    }
+    
+    function guestLogin() {
+        const key = 'VISITANTE_' + Date.now().toString().slice(-6);
+        const pass = 'guest';
+        STATE.keys.push({ id: genId(), key, pass, role: 'E', active: true });
+        saveAll();
+        STATE.user = STATE.keys.find(k => k.key === key);
+        $('userInfo').innerText = `👤 ${key} (Visitante)`;
+        toTotem();
+        toast('Modo visitante ativado');
+    }
+    
+    // ==================== CARDÁPIO E CATEGORIAS ====================
+    function renderCategories() {
+        const categories = ['Todos', ...new Set(STATE.products.filter(p => p.available).map(p => p.cat))];
+        const catTabs = $('categoryTabs');
+        catTabs.innerHTML = '';
+        categories.forEach(cat => {
+            const btn = document.createElement('div');
+            btn.className = `filter-tab ${STATE.selectedCategory === cat ? 'active' : ''}`;
+            btn.innerText = cat;
+            btn.onclick = () => filterProducts(cat);
+            catTabs.appendChild(btn);
+        });
+        
+        if (STATE.selectedCategory !== 'Todos') {
+            renderSubcategories(STATE.selectedCategory);
+        } else {
+            $('subcategoryTabs').style.display = 'none';
+        }
+        renderProducts();
+    }
+    
+    function renderSubcategories(category) {
+        const subcats = ['Todos', ...new Set(STATE.products.filter(p => p.cat === category && p.available).map(p => p.subcat))];
+        const subcatTabs = $('subcategoryTabs');
+        subcatTabs.innerHTML = '';
+        if (subcats.length > 1) {
+            subcatTabs.style.display = 'flex';
+            subcats.forEach(subcat => {
+                const btn = document.createElement('div');
+                btn.className = `filter-tab ${STATE.selectedSubcategory === subcat ? 'active' : ''}`;
+                btn.innerText = subcat;
+                btn.onclick = () => filterProducts(category, subcat);
+                subcatTabs.appendChild(btn);
+            });
+        } else {
+            subcatTabs.style.display = 'none';
+            STATE.selectedSubcategory = null;
+        }
+    }
+    
+    function filterProducts(category, subcategory = null) {
+        STATE.selectedCategory = category;
+        STATE.selectedSubcategory = subcategory;
+        renderCategories();
+        renderProducts();
+    }
+    
+    function renderProducts() {
+        const grid = $('totemGrid');
+        grid.innerHTML = '';
+        let filtered = STATE.products.filter(p => p.available);
+        
+        if (STATE.selectedCategory !== 'Todos') {
+            filtered = filtered.filter(p => p.cat === STATE.selectedCategory);
+            if (STATE.selectedSubcategory && STATE.selectedSubcategory !== 'Todos') {
+                filtered = filtered.filter(p => p.subcat === STATE.selectedSubcategory);
+            }
+        }
+        
+        filtered.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.onclick = () => addToCart(p.id);
+            div.innerHTML = `
+                <div class="thumb"><img src="${p.img || 'https://via.placeholder.com/150/CCCCCC/666666?text=Imagem'}" alt="${p.name}"></div>
+                <div style="padding:8px;">
+                    <div style="font-weight:bold">${p.name}</div>
+                    <div class="small">R$ ${formatMoney(p.price)}</div>
+                    <div class="kv">📦 Estoque: ${p.stock}</div>
+                </div>
+            `;
+            grid.appendChild(div);
+        });
+    }
+    
+    // ==================== CARRINHO ====================
+    function toggleDrawer() { $('drawer').classList.toggle('open'); }
+    
+    function renderCart() {
+        const list = $('cartItems');
+        const countEl = $('cartCount');
+        list.innerHTML = '';
+        if (!STATE.cart.items.length) {
+            list.innerHTML = '<div class="small">🛒 Carrinho vazio</div>';
+            countEl.innerText = '0';
+            $('cartSum').innerText = formatMoney(0);
+            return;
+        }
+        let sum = 0;
+        STATE.cart.items.forEach((item, idx) => {
+            sum += item.price * item.qty;
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin:8px 0;padding:8px;border-bottom:1px solid #eee;';
+            row.innerHTML = `
+                <div style="flex:1">
+                    <div><strong>${item.name}</strong></div>
+                    <div class="small">R$ ${formatMoney(item.price)}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button class="btn-ghost" style="padding:4px 8px;" onclick="changeQty(${idx}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="btn-ghost" style="padding:4px 8px;" onclick="changeQty(${idx}, 1)">+</button>
+                </div>
+            `;
+            list.appendChild(row);
+        });
+        countEl.innerText = STATE.cart.items.reduce((s, i) => s + i.qty, 0);
+        $('cartSum').innerText = formatMoney(sum);
+        lsSet(LS.CART, STATE.cart);
+    }
+    
+    function changeQty(idx, delta) {
+        const item = STATE.cart.items[idx];
+        if (!item) return;
+        const product = STATE.products.find(p => p.id === item.id);
+        if (!product) return;
+        
+        if (delta > 0 && product.stock <= 0) {
+            toast(`${product.name} sem estoque`);
+            return;
+        }
+        
+        if (delta > 0) {
+            product.stock--;
+            item.qty++;
+        } else if (delta < 0 && item.qty > 1) {
+            product.stock++;
+            item.qty--;
+        } else if (delta < 0 && item.qty === 1) {
+            product.stock++;
+            STATE.cart.items.splice(idx, 1);
+        }
+        
+        if (STATE.cart.items.length === 0) {
+            STATE.cart = { items: [] };
+        }
+        
+        saveAll();
+        renderCart();
+        renderProducts();
+    }
+    
+    function addToCart(id) {
+        if (!STATE.setup.storeOpen && STATE.user?.role === 'E') {
+            toast('Loja fechada no momento');
+            return;
+        }
+        const product = STATE.products.find(p => p.id === id);
+        if (!product) return;
+        if (product.stock <= 0) {
+            toast(`${product.name} sem estoque`);
+            return;
+        }
+        
+        const existing = STATE.cart.items.find(i => i.id === id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            STATE.cart.items.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+        }
+        product.stock--;
+        
+        saveAll();
+        renderCart();
+        renderProducts();
+        toast(`${product.name} adicionado!`);
+    }
+    
+    function clearCart() {
+        STATE.cart.items.forEach(item => {
+            const product = STATE.products.find(p => p.id === item.id);
+            if (product) product.stock += item.qty;
+        });
+        STATE.cart = { items: [] };
+        saveAll();
+        renderCart();
+        renderProducts();
+        toast('Carrinho limpo');
+    }
+    
+    function checkout() {
+        if (!STATE.cart.items.length) { toast('Carrinho vazio'); return; }
+        if (!STATE.setup.storeOpen && STATE.user?.role === 'E') { toast('Loja fechada'); return; }
+        
+        let customerName = '';
+        if (STATE.user?.role === 'D' || STATE.user?.role === 'A' || STATE.user?.role === 'B') {
+            customerName = prompt('Número da mesa:') || 'Mesa';
+        } else {
+            customerName = prompt('Seu nome para chamar:') || 'Cliente';
+        }
+        if (!customerName) return;
+        
+        const total = STATE.cart.items.reduce((s, i) => s + i.price * i.qty, 0);
+        const newOrder = {
+            id: genId(),
+            table: customerName,
+            staff: STATE.user?.key || 'Visitante',
+            status: 'pending',
+            items: [...STATE.cart.items],
+            total: total,
+            createdAt: new Date().toISOString(),
+            completed: false
+        };
+        
+        STATE.orders.unshift(newOrder);
+        STATE.cart = { items: [] };
+        saveAll();
+        renderCart();
+        renderProducts();
+        
+        toast(`✅ Pedido #${newOrder.id.toString().slice(-6)} enviado para a cozinha!`);
+        
+        if (STATE.currentScreen === 'kitchenScreen') {
+            renderKitchen();
+        }
+    }
+    
+    // ==================== COZINHA ====================
+    function renderKitchen() {
+        const pendingOrders = STATE.orders.filter(o => !o.completed);
+        const grid = $('kitchenOrders');
+        const empty = $('kitchenEmpty');
+        
+        let pending = 0, preparing = 0, ready = 0;
+        pendingOrders.forEach(o => {
+            if (o.status === 'pending') pending++;
+            else if (o.status === 'preparing') preparing++;
+            else if (o.status === 'ready') ready++;
+        });
+        
+        $('cnt-pending').innerText = pending;
+        $('cnt-preparing').innerText = preparing;
+        $('cnt-ready').innerText = ready;
+        
+        if (pendingOrders.length === 0) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        
+        empty.style.display = 'none';
+        grid.innerHTML = pendingOrders.map(order => `
+            <div class="order-card status-${order.status}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <strong>🍽️ Mesa: ${order.table}</strong>
+                    <span class="small">#${order.id.toString().slice(-6)}</span>
+                </div>
+                <div class="small" style="color:#666;margin-bottom:8px;">
+                    👨‍🍳 ${order.staff} • ${new Date(order.createdAt).toLocaleTimeString()}
+                </div>
+                <div style="margin:8px 0;">
+                    ${order.items.map(item => `
+                        <div style="display:flex;gap:8px;padding:4px 0;">
+                            <span style="min-width:40px;">${item.qty}x</span>
+                            <span>${item.name}</span>
+                            <span class="small">R$ ${formatMoney(item.price)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    ${order.status === 'pending' ? `
+                        <button class="btn-secondary" style="flex:1;background:#fd7e14;" onclick="updateOrderStatus('${order.id}', 'preparing')">▶ Iniciar</button>
+                        <button class="btn-success" style="flex:1;" onclick="updateOrderStatus('${order.id}', 'ready')">✅ Pronto</button>
+                    ` : ''}
+                    ${order.status === 'preparing' ? `
+                        <button class="btn-success" style="flex:1;" onclick="updateOrderStatus('${order.id}', 'ready')">✅ Pronto</button>
+                        <button class="btn-secondary" style="flex:1;background:#6c757d;" onclick="updateOrderStatus('${order.id}', 'completed')">🏁 Entregue</button>
+                    ` : ''}
+                    ${order.status === 'ready' ? `
+                        <button class="btn-secondary" style="flex:1;background:#6c757d;" onclick="updateOrderStatus('${order.id}', 'completed')">🏁 Entregue</button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    function updateOrderStatus(orderId, newStatus) {
+        const order = STATE.orders.find(o => o.id == orderId);
+        if (!order) return;
+        order.status = newStatus;
+        if (newStatus === 'completed') {
+            order.completed = true;
+        }
+        saveAll();
+        renderKitchen();
+        toast(`Pedido #${orderId.toString().slice(-6)}: ${getStatusName(newStatus)}`);
+        if (STATE.currentScreen === 'adminScreen') {
+            renderDashboard();
+        }
+    }
+    
+    function getStatusName(status) {
+        const names = { pending: 'Aguardando', preparing: 'Preparando', ready: 'Pronto', completed: 'Entregue' };
+        return names[status] || status;
+    }
+    
+    // ==================== ADMIN ====================
+    function renderAdminTabs() {
+        const container = $('adminTabs');
+        container.innerHTML = '';
+        const userRole = STATE.user?.role;
+        
+        ADMIN_TABS.forEach(tab => {
+            if (tab.roles.includes(userRole)) {
+                const btn = document.createElement('button');
+                btn.className = 'tab-btn';
+                btn.innerText = tab.name;
+                btn.onclick = () => {
+                    document.querySelectorAll('#adminTabs .tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    $(`tab-${tab.id}`).classList.add('active');
+                    if (tab.id === 'dashboard') renderDashboard();
+                    if (tab.id === 'products') renderProductsTable();
+                    if (tab.id === 'people') renderPeopleTable();
+                    if (tab.id === 'coupons') renderCouponsTable();
+                    if (tab.id === 'keys') renderKeysTable();
+                };
+                container.appendChild(btn);
+            }
+        });
+        
+        if (container.firstChild) {
+            container.firstChild.click();
+        }
+    }
+    
+    function renderDashboard() {
+        const summary = $('dashboardSummary');
+        const totalSales = STATE.orders.reduce((s, o) => s + o.total, 0);
+        const activeOrders = STATE.orders.filter(o => !o.completed).length;
+        
+        summary.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;">
+                <div style="background:#f0f0f0;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:bold;">R$ ${formatMoney(totalSales)}</div>
+                    <div class="small">Total em Vendas</div>
+                </div>
+                <div style="background:#f0f0f0;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:bold;">${STATE.orders.length}</div>
+                    <div class="small">Total de Pedidos</div>
+                </div>
+                <div style="background:#f0f0f0;padding:12px;border-radius:8px;text-align:center;">
+                    <div style="font-size:1.5rem;font-weight:bold;">${activeOrders}</div>
+                    <div class="small">Pedidos Ativos</div>
+                </div>
+            </div>
+        `;
+        
+        const ordersList = $('ordersList');
+        ordersList.innerHTML = `
+            <table class="table-data">
+                <thead><tr><th>ID</th><th>Mesa/Cliente</th><th>Status</th><th>Total</th><th>Ações</th></tr></thead>
+                <tbody>
+                    ${STATE.orders.filter(o => !o.completed).slice(0, 10).map(o => `
+                        <tr>
+                            <td>${o.id.toString().slice(-6)}</td>
+                            <td>${o.table}</td>
+                            <td>${getStatusName(o.status)}</td>
+                            <td>R$ ${formatMoney(o.total)}</td>
+                            <td><button class="btn-ghost" onclick="updateOrderStatus('${o.id}', '${o.status === 'pending' ? 'preparing' : o.status === 'preparing' ? 'ready' : 'completed'}')">${o.status === 'pending' ? 'Iniciar' : o.status === 'preparing' ? 'Pronto' : 'Entregar'}</button></td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        renderOrdersTable();
+    }
+    
+    function renderOrdersTable() {
+        const table = $('ordersTable');
+        table.innerHTML = `
+            <thead><tr><th>ID</th><th>Data</th><th>Mesa</th><th>Status</th><th>Total</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${STATE.orders.map(o => `
+                    <tr>
+                        <td>${o.id.toString().slice(-6)}</td>
+                        <td>${new Date(o.createdAt).toLocaleDateString()}</td>
+                        <td>${o.table}</td>
+                        <td>${getStatusName(o.status)}</td>
+                        <td>R$ ${formatMoney(o.total)}</td>
+                        <td><button class="btn-danger" onclick="deleteOrder('${o.id}')">🗑️</button></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+    
+    function deleteOrder(id) {
+        if (confirm('Excluir este pedido permanentemente?')) {
+            STATE.orders = STATE.orders.filter(o => o.id != id);
+            saveAll();
+            renderDashboard();
+            renderKitchen();
+            toast('Pedido excluído');
+        }
+    }
+    
+    function renderProductsTable() {
+        const table = $('prodTable');
+        table.innerHTML = `
+            <thead><tr><th>Nome</th><th>Preço</th><th>Categoria</th><th>Estoque</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${STATE.products.map(p => `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>R$ ${formatMoney(p.price)}</td>
+                        <td>${p.cat || '-'}</td>
+                        <td>${p.stock}</td>
+                        <td>
+                            <button class="btn-ghost" onclick="editProduct('${p.id}')">✏️</button>
+                            <button class="btn-danger" onclick="deleteProduct('${p.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+    
+    function saveProduct() {
+        const id = $('prodId').value;
+        const name = $('prodName').value;
+        const price = parseFloat($('prodPrice').value);
+        const cat = $('prodCat').value;
+        const subcat = $('prodSubcat').value;
+        const stock = parseInt($('prodStock').value);
+        const img = $('prodImg').value;
+        
+        if (!name || !price) { toast('Preencha nome e preço'); return; }
+        
+        const product = { id: id || genId(), name, price, cat, subcat, stock, img, available: true };
+        
+        if (id) {
+            const index = STATE.products.findIndex(p => p.id == id);
+            if (index !== -1) STATE.products[index] = product;
+        } else {
+            STATE.products.push(product);
+        }
+        
+        saveAll();
+        renderProductsTable();
+        renderProducts();
+        resetForm('prodForm');
+        toast('Produto salvo!');
+    }
+    
+    function editProduct(id) {
+        const p = STATE.products.find(x => x.id == id);
+        if (p) {
+            $('prodId').value = p.id;
+            $('prodName').value = p.name;
+            $('prodPrice').value = p.price;
+            $('prodCat').value = p.cat || '';
+            $('prodSubcat').value = p.subcat || '';
+            $('prodStock').value = p.stock;
+            $('prodImg').value = p.img || '';
+        }
+    }
+    
+    function deleteProduct(id) {
+        if (confirm('Excluir produto?')) {
+            STATE.products = STATE.products.filter(p => p.id != id);
+            saveAll();
+            renderProductsTable();
+            renderProducts();
+            toast('Produto excluído');
+        }
+    }
+    
+    function renderPeopleTable() {
+        const table = $('peopleTable');
+        table.innerHTML = `
+            <thead><tr><th>Nome</th><th>Telefone</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${STATE.people.map(p => `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.phone || '-'}</td>
+                        <td>
+                            <button class="btn-ghost" onclick="editPerson('${p.id}')">✏️</button>
+                            <button class="btn-danger" onclick="deletePerson('${p.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+    
+    function savePerson() {
+        const id = $('personId').value;
+        const name = $('personName').value;
+        const phone = $('personPhone').value;
+        if (!name) { toast('Nome obrigatório'); return; }
+        const person = { id: id || genId(), name, phone };
+        if (id) {
+            const index = STATE.people.findIndex(p => p.id == id);
+            if (index !== -1) STATE.people[index] = person;
+        } else {
+            STATE.people.push(person);
+        }
+        saveAll();
+        renderPeopleTable();
+        resetForm('personForm');
+        toast('Pessoa salva');
+    }
+    
+    function editPerson(id) {
+        const p = STATE.people.find(x => x.id == id);
+        if (p) {
+            $('personId').value = p.id;
+            $('personName').value = p.name;
+            $('personPhone').value = p.phone || '';
+        }
+    }
+    
+    function deletePerson(id) {
+        if (confirm('Excluir pessoa?')) {
+            STATE.people = STATE.people.filter(p => p.id != id);
+            saveAll();
+            renderPeopleTable();
+            toast('Pessoa excluída');
+        }
+    }
+    
+    function renderCouponsTable() {
+        const table = $('couponsTable');
+        table.innerHTML = `
+            <thead><tr><th>Código</th><th>Valor</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${STATE.coupons.map(c => `
+                    <tr>
+                        <td>${c.code}</td>
+                        <td>R$ ${formatMoney(c.value)}</td>
+                        <td>
+                            <button class="btn-ghost" onclick="editCoupon('${c.id}')">✏️</button>
+                            <button class="btn-danger" onclick="deleteCoupon('${c.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+    
+    function saveCoupon() {
+        const id = $('couponId').value;
+        const code = $('couponCode').value;
+        const value = parseFloat($('couponValue').value);
+        if (!code || !value) { toast('Preencha código e valor'); return; }
+        const coupon = { id: id || genId(), code, value };
+        if (id) {
+            const index = STATE.coupons.findIndex(c => c.id == id);
+            if (index !== -1) STATE.coupons[index] = coupon;
+        } else {
+            STATE.coupons.push(coupon);
+        }
+        saveAll();
+        renderCouponsTable();
+        resetForm('couponForm');
+        toast('Cupom salvo');
+    }
+    
+    function editCoupon(id) {
+        const c = STATE.coupons.find(x => x.id == id);
+        if (c) {
+            $('couponId').value = c.id;
+            $('couponCode').value = c.code;
+            $('couponValue').value = c.value;
+        }
+    }
+    
+    function deleteCoupon(id) {
+        if (confirm('Excluir cupom?')) {
+            STATE.coupons = STATE.coupons.filter(c => c.id != id);
+            saveAll();
+            renderCouponsTable();
+            toast('Cupom excluído');
+        }
+    }
+    
+    function renderKeysTable() {
+        const table = $('keysTable');
+        table.innerHTML = `
+            <thead><tr><th>Key</th><th>Role</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+                ${STATE.keys.map(k => `
+                    <tr>
+                        <td>${k.key}</td>
+                        <td>${k.role}</td>
+                        <td>${k.active ? '✅ Ativa' : '❌ Inativa'}</td>
+                        <td>
+                            <button class="btn-ghost" onclick="toggleKey('${k.id}')">${k.active ? 'Desativar' : 'Ativar'}</button>
+                            <button class="btn-danger" onclick="deleteKey('${k.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+    
+    function saveKey() {
+        const id = $('keyId').value;
+        const key = $('keyKey').value;
+        const pass = $('keyPass').value;
+        const role = $('keyRole').value;
+        if (!key || !pass) { toast('Preencha key e senha'); return; }
+        if (STATE.keys.find(k => k.key === key && k.id != id)) { toast('Key já existe'); return; }
+        const newKey = { id: id || genId(), key, pass, role, active: true };
+        if (id) {
+            const index = STATE.keys.findIndex(k => k.id == id);
+            if (index !== -1) STATE.keys[index] = newKey;
+        } else {
+            STATE.keys.push(newKey);
+        }
+        saveAll();
+        renderKeysTable();
+        resetForm('keyForm');
+        toast('Key salva');
+    }
+    
+    function toggleKey(id) {
+        const k = STATE.keys.find(x => x.id == id);
+        if (k) {
+            k.active = !k.active;
+            saveAll();
+            renderKeysTable();
+            toast(`Key ${k.active ? 'ativada' : 'desativada'}`);
+        }
+    }
+    
+    function deleteKey(id) {
+        const k = STATE.keys.find(x => x.id == id);
+        if (k && k.key === 'ADMIN') { toast('Não pode excluir ADMIN'); return; }
+        if (confirm('Excluir key?')) {
+            STATE.keys = STATE.keys.filter(k => k.id != id);
+            saveAll();
+            renderKeysTable();
+            toast('Key excluída');
+        }
+    }
+    
+    function renderAllAdminTables() {
+        renderProductsTable();
+        renderPeopleTable();
+        renderCouponsTable();
+        renderKeysTable();
+    }
+    
+    function resetForm(formId) {
+        $(`${formId}`).reset();
+        $(`${formId}Id`).value = '';
+    }
+    
+    // ==================== CONFIGURAÇÕES ====================
+    function toggleStoreStatus() {
+        STATE.setup.storeOpen = $('storeOpenToggle').checked;
+        saveAll();
+        renderSettings();
+        toast(`Loja ${STATE.setup.storeOpen ? 'aberta' : 'fechada'}`);
+    }
+    
+    function saveSetup() {
+        STATE.setup.lowStockThreshold = parseInt($('lowStockThreshold').value) || 5;
+        STATE.setup.whatsapp = $('waPhone').value;
+        STATE.setup.pixKey = $('pixKey').value;
+        STATE.setup.paymentMessage = $('paymentMessage').value;
+        saveAll();
+        toast('Configurações salvas');
+    }
+    
+    function renderSettings() {
+        $('storeOpenToggle').checked = STATE.setup.storeOpen;
+        $('storeStatusLabel').innerText = STATE.setup.storeOpen ? '🟢 Loja Aberta' : '🔴 Loja Fechada';
+        $('lowStockThreshold').value = STATE.setup.lowStockThreshold;
+        $('waPhone').value = STATE.setup.whatsapp;
+        $('pixKey').value = STATE.setup.pixKey;
+        $('paymentMessage').value = STATE.setup.paymentMessage;
+    }
+    
+    function exportData() {
+        const exportState = {
+            products: STATE.products,
+            people: STATE.people,
+            coupons: STATE.coupons,
+            keys: STATE.keys.filter(k => k.key !== 'ADMIN'),
+            orders: STATE.orders,
+            setup: STATE.setup
+        };
+        const data = JSON.stringify(exportState, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `labfood_${new Date().toISOString().slice(0,19)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast('Dados exportados');
+    }
+    
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (data.products) STATE.products = data.products;
+                if (data.people) STATE.people = data.people;
+                if (data.coupons) STATE.coupons = data.coupons;
+                if (data.orders) STATE.orders = data.orders;
+                if (data.setup) STATE.setup = {...STATE.setup, ...data.setup};
+                saveAll();
+                loadAll();
+                toast('Dados importados');
+                location.reload();
+            } catch (err) {
+                toast('Arquivo inválido');
+            }
+        };
+        reader.readAsText(file);
+    }
+    
+    function resetAllData() {
+        if (confirm('⚠️ Isso apagará TODOS os dados! Continuar?')) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+    
+    // ==================== EVENTOS E INICIALIZAÇÃO ====================
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAll();
+        renderSettings();
+        $('prodForm').addEventListener('submit', (e) => { e.preventDefault(); saveProduct(); });
+        $('personForm').addEventListener('submit', (e) => { e.preventDefault(); savePerson(); });
+        $('couponForm').addEventListener('submit', (e) => { e.preventDefault(); saveCoupon(); });
+        $('keyForm').addEventListener('submit', (e) => { e.preventDefault(); saveKey(); });
+        toLogin();
+    });
+    
+    // Expor funções globais
+    window.login = login;
+    window.registerUser = registerUser;
+    window.guestLogin = guestLogin;
+    window.toTotem = toTotem;
+    window.toAdminPanel = toAdminPanel;
+    window.switchToKitchen = switchToKitchen;
+    window.toggleDrawer = toggleDrawer;
+    window.addToCart = addToCart;
+    window.changeQty = changeQty;
+    window.clearCart = clearCart;
+    window.checkout = checkout;
+    window.updateOrderStatus = updateOrderStatus;
+    window.deleteOrder = deleteOrder;
+    window.editProduct = editProduct;
+    window.deleteProduct = deleteProduct;
+    window.editPerson = editPerson;
+    window.deletePerson = deletePerson;
+    window.editCoupon = editCoupon;
+    window.deleteCoupon = deleteCoupon;
+    window.toggleKey = toggleKey;
+    window.deleteKey = deleteKey;
+    window.toggleStoreStatus = toggleStoreStatus;
+    window.saveSetup = saveSetup;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.resetAllData = resetAllData;
+    window.resetForm = resetForm;
+</script>
+</body>
+  </html>
